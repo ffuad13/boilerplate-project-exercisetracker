@@ -24,16 +24,16 @@ const exerciseSchema = mongoose.Schema({
 	},
 	description: String,
 	duration: Number,
-	date: String
+	date: Date
 })
 
 userSchema.virtual('exer', {
 	ref: 'Exercise',
 	localField: '_id',
-	foreignField: 'User'
+	foreignField: 'user_id',
 })
 
-const User = mongoose.model("User", userSchema)
-const Exercise = mongoose.model('Exercise', exerciseSchema)
+const User = mongoose.model("User", userSchema, "User")
+const Exercise = mongoose.model("Exercise", exerciseSchema, "Exercise")
 
 module.exports = { User, Exercise }
