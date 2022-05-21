@@ -34,19 +34,21 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
     let {description, duration, date} = req.body
     const UID = req.params._id
 
-    if (date == '') {
+    if (!date || date === '' || date === null) {
       date = new Date()
+    } else {
+      let dateBody = date
+      let newDate = new Date(dateBody)
+      date = newDate
     }
 
     let durInt = parseInt(duration)
-    let dateBody = new Date(date)
-    let strDate = dateBody.toDateString()
 
     let insert = await Exercise.create({
       user_id: UID,
       description: description,
       duration: durInt,
-      date: strDate
+      date: date
     })
 
     let user = await User.findById(UID)
@@ -55,7 +57,7 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
       username: user.username,
       description: insert.description,
       duration: insert.duration,
-      date: insert.date,
+      date: insert['date'].toDateString(),
       _id: user._id
     })
   } catch (error) {
@@ -74,6 +76,34 @@ app.get('/api/users', async (req, res) => {
   } catch (error) {
     res.status(500).send({
       msg:"Error"
+    })
+  }
+})
+
+app.get('/api/users/:_id/logs', async (req, res) => {
+  try {
+    let data = await User.findOne({_id: req.params._id}).populate('exer')
+
+    let logs = []
+    for (let i=0; i < data['exer'].length; i++) {
+      let result = {
+        description: data['exer'][i].description,
+        duration: data['exer'][i].duration,
+        date: data['exer'][i]['date'].toDateString()
+      }
+
+      logs.push(result)
+    }
+
+    return res.json({
+      username: data.username,
+      count: data['exer'].length,
+      _id: data._id,
+      log: logs
+    })
+  } catch (error) {
+    res.status(500).send({
+      err: error.message
     })
   }
 })
