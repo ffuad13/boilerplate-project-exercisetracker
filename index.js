@@ -85,7 +85,11 @@ app.get('/api/users/:_id/logs', async (req, res) => {
     let {from, to, limit} = req.query
     limit = parseInt(limit)
 
-    let data = await User.findOne({_id: req.params._id}).populate('exer')
+    let data = await User.findOne({_id: req.params._id}).populate({
+      path: 'exer',
+      date: { $gte: from, $lte: to },
+      options: {limit: limit}
+    })
 
     let logs = []
     for (let i=0; i < data['exer'].length; i++) {
