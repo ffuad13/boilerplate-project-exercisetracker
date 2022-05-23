@@ -82,6 +82,9 @@ app.get('/api/users', async (req, res) => {
 
 app.get('/api/users/:_id/logs', async (req, res) => {
   try {
+    let {from, to, limit} = req.query
+    limit = parseInt(limit)
+
     let data = await User.findOne({_id: req.params._id}).populate('exer')
 
     let logs = []
@@ -95,7 +98,23 @@ app.get('/api/users/:_id/logs', async (req, res) => {
       logs.push(result)
     }
 
+    if (from && to && limit) {
+      let fromDate = new Date(from)
+      let toDate = new Date(to)
+
+      return res.json({
+        _id: data._id,
+        username: data.username,
+        from: fromDate.toDateString(),
+        to: toDate.toDateString(),
+        count: data['exer'].length,
+        _id: data._id,
+        log: logs
+      })
+    }
+
     return res.json({
+      _id: data._id,
       username: data.username,
       count: data['exer'].length,
       _id: data._id,
